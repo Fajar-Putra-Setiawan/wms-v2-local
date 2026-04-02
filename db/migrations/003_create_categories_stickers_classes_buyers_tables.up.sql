@@ -33,7 +33,10 @@ CREATE TABLE IF NOT EXISTS classes (
     disc INT DEFAULT 0,
     min_transaction_value DECIMAL(15,2),
     week INT,
-    iteration INT
+    iteration INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_classes_name_min_order ON classes(name, min_order);
@@ -45,7 +48,10 @@ CREATE TABLE IF NOT EXISTS buyers (
     email VARCHAR(255),
     phone VARCHAR(20),
     class_id CHAR(36),
-    address VARCHAR(255)
+    address VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_buyers_class_id ON buyers(class_id);
