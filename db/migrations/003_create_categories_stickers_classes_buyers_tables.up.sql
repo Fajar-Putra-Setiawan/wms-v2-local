@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS stickers (
     fixed_price INT,
     min_price DECIMAL(15,2),
     max_price DECIMAL(15,2),
+    status VARCHAR(50) CHECK (status IN ('active', 'inactive')) DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP
