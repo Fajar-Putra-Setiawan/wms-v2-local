@@ -27,6 +27,7 @@ func SetupRoutes(r *gin.Engine) {
 	classService := services.NewClassService(classRepo)
 	productMasterService := services.NewProductMasterService(productMasterRepo)
 	productDocumentService := services.NewProductDocumentService(productDocumentRepo)
+	productMasterSummaryService := services.NewProductMasterSummaryService(productMasterRepo)
 
 	// Controllers
 	categoryController := controller.NewCategoryController(categoryService)
@@ -35,6 +36,7 @@ func SetupRoutes(r *gin.Engine) {
 	classController := controller.NewClassController(classService)
 	productMasterController := controller.NewProductMasterController(productMasterService)
 	productDocumentController := controller.NewProductDocumentController(productDocumentService)
+	productMasterSummaryController := controller.NewProductMasterSummaryController(productMasterSummaryService)
 
 	// Public API
 	api := r.Group("/api")
@@ -76,5 +78,8 @@ func SetupRoutes(r *gin.Engine) {
 
 		// Product Document
 		api.GET("/product-documents", productDocumentController.ListDocuments)
+
+		// Product Master Summary
+		api.GET("/manual/summary", productMasterSummaryController.GetSummary)
 	}
 }
