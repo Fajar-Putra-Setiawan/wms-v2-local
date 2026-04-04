@@ -31,6 +31,7 @@ type CreateStickerPayload struct {
 	FixedPrice *int     `json:"fixed_price"`
 	MinPrice   *float64 `json:"min_price"`
 	MaxPrice   *float64 `json:"max_price"`
+	Status     string   `json:"status"`
 }
 
 // UpdateStickerPayload request payload for update.
@@ -42,6 +43,7 @@ type UpdateStickerPayload struct {
 	FixedPrice *int     `json:"fixed_price"`
 	MinPrice   *float64 `json:"min_price"`
 	MaxPrice   *float64 `json:"max_price"`
+	Status     string   `json:"status"`
 }
 
 type stickerService struct {

@@ -67,17 +67,30 @@ func (s *categoryService) UpdateCategory(id string, input UpdateCategoryPayload)
 		}
 		category.Slug = uniqueSlug
 	}
+	// Discount: jika nil, set ke 0
 	if input.Discount != nil {
 		category.Discount = input.Discount
+	} else {
+		defaultDiscount := 0
+		category.Discount = &defaultDiscount
 	}
+
+	// MinPrice: jika nil, set ke 100000
 	if input.MinPrice != nil {
 		p := models.Price(*input.MinPrice)
 		category.MinPrice = &p
+	} else {
+		defaultMin := models.Price(100000)
+		category.MinPrice = &defaultMin
 	}
+
 	if input.MaxPrice != nil {
 		p := models.Price(*input.MaxPrice)
 		category.MaxPrice = &p
+	} else {
+		category.MaxPrice = nil
 	}
+
 	if input.Status != "" {
 		category.Status = input.Status
 	}
@@ -211,12 +224,17 @@ func (s *categoryService) CreateCategory(input CreateCategoryPayload) (*models.C
 	if input.MinPrice != nil {
 		p := models.Price(*input.MinPrice)
 		minPrice = &p
+	} else {
+		defaultMin := models.Price(100000)
+		minPrice = &defaultMin
 	}
 
 	var maxPrice *models.Price
 	if input.MaxPrice != nil {
 		p := models.Price(*input.MaxPrice)
 		maxPrice = &p
+	} else {
+		maxPrice = nil
 	}
 
 	category := &models.Category{

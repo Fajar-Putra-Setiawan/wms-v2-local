@@ -89,34 +89,74 @@ func InboundManualHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Logic BE: tentukan category_id/sticker_id otomatis
+		// Logic BE: tentukan category_id/sticker_id otomatis dan PriceWarehouse
 		var categoryID, stickerID, typeID string
+		var priceWarehouse float64 = req.Price
+		var master models.ProductMaster
 		if req.Price >= 100000 {
 			if req.CategoryID != nil {
 				categoryID = *req.CategoryID
+				// Ambil diskon kategori
+				var category models.Category
+				if err := db.Where("id = ?", categoryID).First(&category).Error; err == nil && category.Discount != nil {
+					discount := float64(*category.Discount)
+					priceWarehouse = req.Price * (1 - discount/100)
+				}
 			}
 			stickerID = ""
 			typeID = "categories"
+
+			master = models.ProductMaster{
+				DocumentID:       doc.ID.String(),
+				Barcode:          barcode,
+				BarcodeWarehouse: barcodeWarehouse,
+				Name:             req.Name,
+				NameWarehouse:    "Manual",
+				Item:             req.Item,
+				Price:            req.Price,
+				PriceWarehouse:   priceWarehouse,
+				CategoryID:       categoryID,
+				StickerID:        stickerID,
+				TypeID:           typeID,
+				Location:         "staging_reguler",
+				TypeOut:          "cargo",
+			}
 		} else {
 			if req.StickerID != nil {
 				stickerID = *req.StickerID
+				// Cari sticker sesuai range harga
+				var sticker models.Sticker
+				if err := db.Where("id = ?", stickerID).First(&sticker).Error; err == nil && sticker.MinPrice != nil && sticker.MaxPrice != nil {
+					if req.Price >= float64(*sticker.MinPrice) && req.Price <= float64(*sticker.MaxPrice) && sticker.FixedPrice != nil {
+						priceWarehouse = float64(*sticker.FixedPrice)
+					}
+				}
+			} else {
+				// Jika stickerID tidak ada, cari sticker yang cocok dengan range harga
+				var sticker models.Sticker
+				if err := db.Where("min_price <= ? AND max_price >= ?", req.Price, req.Price).First(&sticker).Error; err == nil && sticker.FixedPrice != nil {
+					stickerID = sticker.ID.String()
+					priceWarehouse = float64(*sticker.FixedPrice)
+				}
 			}
 			categoryID = ""
 			typeID = "sticker"
-		}
 
-		master := models.ProductMaster{
-			DocumentID:       doc.ID.String(),
-			Barcode:          barcode,
-			BarcodeWarehouse: barcodeWarehouse,
-			Name:             req.Name,
-			Item:             req.Item,
-			Price:            req.Price,
-			CategoryID:       categoryID,
-			StickerID:        stickerID,
-			TypeID:           typeID,
-			Location:         "rack",
-			TypeOut:          "cargo",
+			master = models.ProductMaster{
+				DocumentID:       doc.ID.String(),
+				Barcode:          barcode,
+				BarcodeWarehouse: barcodeWarehouse,
+				Name:             req.Name,
+				NameWarehouse:    "Manual",
+				Item:             req.Item,
+				Price:            req.Price,
+				PriceWarehouse:   priceWarehouse,
+				CategoryID:       categoryID,
+				StickerID:        stickerID,
+				TypeID:           typeID,
+				Location:         "staging_sticker",
+				TypeOut:          "cargo",
+			}
 		}
 
 		// Insert ke ProductPending
