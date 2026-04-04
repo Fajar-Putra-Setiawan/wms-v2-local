@@ -17,18 +17,24 @@ func SetupRoutes(r *gin.Engine) {
 	stickerRepo := repositories.NewStickerRepository(config.DB)
 	buyerRepo := repositories.NewBuyerRepository(config.DB)
 	classRepo := repositories.NewClassRepository(config.DB)
+	productMasterRepo := repositories.NewProductMasterRepository(config.DB)
+	productDocumentRepo := repositories.NewProductDocumentRepository(config.DB)
 
 	// Services
 	categoryService := services.NewCategoryService(categoryRepo)
 	stickerService := services.NewStickerService(stickerRepo)
 	buyerService := services.NewBuyerService(buyerRepo, classRepo)
 	classService := services.NewClassService(classRepo)
+	productMasterService := services.NewProductMasterService(productMasterRepo)
+	productDocumentService := services.NewProductDocumentService(productDocumentRepo)
 
 	// Controllers
 	categoryController := controller.NewCategoryController(categoryService)
 	stickerController := controller.NewStickerController(stickerService)
 	buyerController := controller.NewBuyerController(buyerService)
 	classController := controller.NewClassController(classService)
+	productMasterController := controller.NewProductMasterController(productMasterService)
+	productDocumentController := controller.NewProductDocumentController(productDocumentService)
 
 	// Public API
 	api := r.Group("/api")
@@ -64,18 +70,11 @@ func SetupRoutes(r *gin.Engine) {
 		// Inbound Manual
 		api.POST("/scanin/manual", controller.InboundManualHandler(config.DB))
 		api.GET("/scanin/manual", controller.ListAllProductMastersHandler(config.DB))
+
+		// Product Master Staging Reguler
+		api.GET("/product-masters/staging-reguler", productMasterController.ListStagingReguler)
+
+		// Product Document
+		api.GET("/product-documents", productDocumentController.ListDocuments)
 	}
-
-	// contoh group lain (auth / protected) disiapkan untuk scale
-	// auth := r.Group("/auth")
-	// {
-	// 	auth.POST("/login", authController.Login)
-	// 	auth.POST("/register", authController.Register)
-	// }
-
-	// protected := r.Group("/api")
-	// protected.Use(authMiddleware)
-	// {
-	// 	protected.GET("/profile", profileController.GetProfile)
-	// }
 }

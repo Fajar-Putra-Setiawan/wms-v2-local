@@ -1,0 +1,26 @@
+package controller
+
+import (
+	"net/http"
+	"wms/services"
+	"wms/utils"
+
+	"github.com/gin-gonic/gin"
+)
+
+type ProductMasterController struct {
+	service services.ProductMasterService
+}
+
+func NewProductMasterController(service services.ProductMasterService) *ProductMasterController {
+	return &ProductMasterController{service: service}
+}
+
+func (ctl *ProductMasterController) ListStagingReguler(c *gin.Context) {
+	masters, err := ctl.service.GetByLocation("staging_reguler")
+	if err != nil {
+		utils.SendError(c, 500, err.Error())
+		return
+	}
+	utils.SendSuccess(c, masters, "List product master staging_reguler", http.StatusOK)
+}

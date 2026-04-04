@@ -143,6 +143,10 @@ func (s *stickerService) CreateSticker(input CreateStickerPayload) (*models.Stic
 		maxPrice = &p
 	}
 
+	status := input.Status
+	if strings.TrimSpace(status) == "" {
+		status = "active"
+	}
 	sticker := &models.Sticker{
 		ID:         uuid.New(),
 		CodeHex:    input.CodeHex,
@@ -152,6 +156,7 @@ func (s *stickerService) CreateSticker(input CreateStickerPayload) (*models.Stic
 		FixedPrice: input.FixedPrice,
 		MinPrice:   minPrice,
 		MaxPrice:   maxPrice,
+		Status:     status,
 	}
 
 	if err := s.repo.Create(sticker); err != nil {
@@ -188,6 +193,13 @@ func (s *stickerService) UpdateSticker(id string, input UpdateStickerPayload) (*
 	}
 	if input.MaxPrice != nil && input.MinPrice != nil && *input.MaxPrice > 0 && *input.MinPrice > *input.MaxPrice {
 		return nil, errors.New("min_price cannot be greater than max_price")
+	}
+
+	// Status: jika kosong, set ke 'active'
+	if input.Status != "" {
+		sticker.Status = input.Status
+	} else {
+		sticker.Status = "active"
 	}
 
 	// Update fields if provided

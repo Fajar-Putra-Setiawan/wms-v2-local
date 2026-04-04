@@ -81,6 +81,7 @@ CREATE TABLE IF NOT EXISTS product_masters (
     sticker_id CHAR(36),
     is_sku BOOLEAN DEFAULT false,
     location VARCHAR(50) CHECK (location IN ('staging_reguler', 'staging_sticker', 'display', 'cargo', 'scrap', 'qcd', 'repair', 'staging_sku')),
+    bundle VARCHAR(50) CHECK (bundle IN ('yes', 'no')) DEFAULT 'no',
     bundle_parent_id CHAR(36),
     date_out TIMESTAMP,
     type_out VARCHAR(50) CHECK (type_out IN ('regular_sales', 'cargo', 'scrap', 'qcd', 'transfer')),

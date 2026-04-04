@@ -8,21 +8,13 @@ import (
 	"time"
 
 	"wms/models"
+	"wms/services"
 	"wms/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
-
-type InboundRequest struct {
-	Name       string  `json:"name" binding:"required"`
-	Item       int     `json:"item" binding:"required,gt=0"`
-	Price      float64 `json:"price" binding:"required"`
-	CategoryID *string `json:"category_id,omitempty"`
-	StickerID  *string `json:"sticker_id,omitempty"`
-	Status     string  `json:"status" binding:"required,oneof=good abnormal damaged non"`
-}
 
 func generateUniqueBarcode() string {
 	t := time.Now().UnixNano()
@@ -41,28 +33,12 @@ func ListAllProductMastersHandler(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-// getOrCreateManualDocument mencari atau membuat dokumen khusus inbound manual
-func getOrCreateManualDocument(db *gorm.DB) (models.ProductDocument, error) {
-	var doc models.ProductDocument
-	err := db.Where("code = ?", "INBOUND_MANUAL").First(&doc).Error
-	if err == gorm.ErrRecordNotFound {
-		doc = models.ProductDocument{
-			Code:     "INBOUND_MANUAL",
-			FileName: "INBOUND_MANUAL",
-			Type:     "manual",
-			Status:   "progress",
-		}
-		if err := db.Create(&doc).Error; err != nil {
-			return doc, err
-		}
-		return doc, nil
-	}
-	return doc, err
-}
+// Tambahkan variabel global untuk service
+var inboundService = services.NewInboundService()
 
 func InboundManualHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var req InboundRequest
+		var req models.InboundRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			var verrs []utils.ErrorItem
 			if ve, ok := err.(validator.ValidationErrors); ok {
@@ -79,105 +55,18 @@ func InboundManualHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		barcode := generateUniqueBarcode()
-		barcodeWarehouse := generateUniqueBarcode()
-
-		// Logic dokumen: cari/buat dokumen manual
-		doc, err := getOrCreateManualDocument(db)
-		if err != nil {
-			utils.SendError(c, 500, "Gagal membuat dokumen manual: "+err.Error())
-			return
-		}
-
-		// Logic BE: tentukan category_id/sticker_id otomatis dan PriceWarehouse
-		var categoryID, stickerID, typeID string
-		var priceWarehouse float64 = req.Price
-		var master models.ProductMaster
-		if req.Price >= 100000 {
-			if req.CategoryID != nil {
-				categoryID = *req.CategoryID
-				// Ambil diskon kategori
-				var category models.Category
-				if err := db.Where("id = ?", categoryID).First(&category).Error; err == nil && category.Discount != nil {
-					discount := float64(*category.Discount)
-					priceWarehouse = req.Price * (1 - discount/100)
-				}
-			}
-			stickerID = ""
-			typeID = "categories"
-
-			master = models.ProductMaster{
-				DocumentID:       doc.ID.String(),
-				Barcode:          barcode,
-				BarcodeWarehouse: barcodeWarehouse,
-				Name:             req.Name,
-				NameWarehouse:    "Manual",
-				Item:             req.Item,
-				Price:            req.Price,
-				PriceWarehouse:   priceWarehouse,
-				CategoryID:       categoryID,
-				StickerID:        stickerID,
-				TypeID:           typeID,
-				Location:         "staging_reguler",
-				TypeOut:          "cargo",
-			}
-		} else {
-			if req.StickerID != nil {
-				stickerID = *req.StickerID
-				// Cari sticker sesuai range harga
-				var sticker models.Sticker
-				if err := db.Where("id = ?", stickerID).First(&sticker).Error; err == nil && sticker.MinPrice != nil && sticker.MaxPrice != nil {
-					if req.Price >= float64(*sticker.MinPrice) && req.Price <= float64(*sticker.MaxPrice) && sticker.FixedPrice != nil {
-						priceWarehouse = float64(*sticker.FixedPrice)
-					}
-				}
-			} else {
-				// Jika stickerID tidak ada, cari sticker yang cocok dengan range harga
-				var sticker models.Sticker
-				if err := db.Where("min_price <= ? AND max_price >= ?", req.Price, req.Price).First(&sticker).Error; err == nil && sticker.FixedPrice != nil {
-					stickerID = sticker.ID.String()
-					priceWarehouse = float64(*sticker.FixedPrice)
-				}
-			}
-			categoryID = ""
-			typeID = "sticker"
-
-			master = models.ProductMaster{
-				DocumentID:       doc.ID.String(),
-				Barcode:          barcode,
-				BarcodeWarehouse: barcodeWarehouse,
-				Name:             req.Name,
-				NameWarehouse:    "Manual",
-				Item:             req.Item,
-				Price:            req.Price,
-				PriceWarehouse:   priceWarehouse,
-				CategoryID:       categoryID,
-				StickerID:        stickerID,
-				TypeID:           typeID,
-				Location:         "staging_sticker",
-				TypeOut:          "cargo",
-			}
-		}
-
-		// Insert ke ProductPending
-		pending := models.ProductPending{
-			DocumentID: doc.ID.String(),
-			Barcode:    barcode,
+		pending, master, err := inboundService.InboundManual(models.InboundRequest{
 			Name:       req.Name,
 			Item:       req.Item,
 			Price:      req.Price,
-			Status:     req.Status, // default status valid
-		}
-		if err := db.Create(&pending).Error; err != nil {
+			CategoryID: req.CategoryID,
+			StickerID:  req.StickerID,
+			Status:     req.Status,
+		}, db)
+		if err != nil {
 			utils.SendError(c, 500, err.Error())
 			return
 		}
-
-		if err := db.Create(&master).Error; err != nil {
-			utils.SendError(c, 500, err.Error())
-			return
-		}
-
 		utils.SendSuccess(c, gin.H{"pending": pending, "master": master}, "Inbound berhasil dibuat", http.StatusOK)
 	}
 }
