@@ -52,5 +52,5 @@ func (ctl *ProductMasterSummaryController) GetSummary(c *gin.Context) {
 		utils.SendError(c, 500, err.Error())
 		return
 	}
-	utils.SendSuccess(c, summary, "Ringkasan pieces", http.StatusOK)
+	utils.SendSuccess(c, summary, "Ringkasan pieces", nil, http.StatusOK)
 }

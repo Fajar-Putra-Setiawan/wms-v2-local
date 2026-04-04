@@ -33,7 +33,7 @@ func (ctrl *StickerController) CreateSticker(c *gin.Context) {
 		return
 	}
 
-	utils.SendSuccess(c, sticker, "Sticker berhasil ditambahkan", http.StatusCreated)
+	utils.SendSuccess(c, sticker, "Sticker berhasil ditambahkan", nil, http.StatusCreated)
 }
 
 // GetStickerByID endpoint.
@@ -46,7 +46,7 @@ func (ctrl *StickerController) GetStickerByID(c *gin.Context) {
 		return
 	}
 
-	utils.SendSuccess(c, sticker, "Sticker ditemukan", http.StatusOK)
+	utils.SendSuccess(c, sticker, "Sticker ditemukan", nil, http.StatusOK)
 }
 
 // ListStickers endpoint.
@@ -57,7 +57,7 @@ func (ctrl *StickerController) ListStickers(c *gin.Context) {
 		return
 	}
 
-	utils.SendSuccess(c, stickers, "Daftar sticker", http.StatusOK)
+	utils.SendSuccess(c, stickers, "Daftar sticker", nil, http.StatusOK)
 }
 
 // UpdateSticker endpoint.
@@ -77,7 +77,7 @@ func (ctrl *StickerController) UpdateSticker(c *gin.Context) {
 		return
 	}
 
-	utils.SendSuccess(c, sticker, "Sticker berhasil diperbarui", http.StatusOK)
+	utils.SendSuccess(c, sticker, "Sticker berhasil diperbarui", nil, http.StatusOK)
 }
 
 // DeleteSticker endpoint.
@@ -90,5 +90,5 @@ func (ctrl *StickerController) DeleteSticker(c *gin.Context) {
 		return
 	}
 
-	utils.SendSuccess(c, nil, "Sticker berhasil dihapus", http.StatusOK)
+	utils.SendSuccess(c, nil, "Sticker berhasil dihapus", nil, http.StatusOK)
 }

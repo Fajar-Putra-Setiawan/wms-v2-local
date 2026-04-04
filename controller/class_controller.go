@@ -34,7 +34,7 @@ func (ctrl *ClassController) CreateClass(c *gin.Context) {
 		return
 	}
 
-	utils.SendSuccess(c, class, "Class berhasil ditambahkan", http.StatusCreated)
+	utils.SendSuccess(c, class, "Class berhasil ditambahkan", nil, http.StatusCreated)
 }
 
 // GetClassByID endpoint.
@@ -55,7 +55,7 @@ func (ctrl *ClassController) GetClassByID(c *gin.Context) {
 		"created_at":            class.CreatedAt,
 		"updated_at":            class.UpdatedAt,
 	}
-	utils.SendSuccess(c, resp, "", http.StatusOK)
+	utils.SendSuccess(c, resp, "", nil, http.StatusOK)
 }
 
 // ListClasses endpoint.
@@ -78,7 +78,7 @@ func (ctrl *ClassController) ListClasses(c *gin.Context) {
 			"updated_at":            class.UpdatedAt,
 		})
 	}
-	utils.SendSuccess(c, resp, "", http.StatusOK)
+	utils.SendSuccess(c, resp, "", nil, http.StatusOK)
 }
 
 // UpdateClass endpoint.
@@ -95,7 +95,7 @@ func (ctrl *ClassController) UpdateClass(c *gin.Context) {
 		utils.SendError(c, 400, err.Error())
 		return
 	}
-	utils.SendSuccess(c, class, "Class berhasil diupdate", http.StatusOK)
+	utils.SendSuccess(c, class, "Class berhasil diupdate", nil, http.StatusOK)
 }
 
 // DeleteClass endpoint.
@@ -105,5 +105,5 @@ func (ctrl *ClassController) DeleteClass(c *gin.Context) {
 		utils.SendError(c, 400, err.Error())
 		return
 	}
-	utils.SendSuccess(c, nil, "Class berhasil dihapus", http.StatusOK)
+	utils.SendSuccess(c, nil, "Class berhasil dihapus", nil, http.StatusOK)
 }

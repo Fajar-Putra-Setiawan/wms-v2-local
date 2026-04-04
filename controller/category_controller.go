@@ -34,7 +34,7 @@ func (ctrl *CategoryController) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	utils.SendSuccess(c, category, "Category berhasil diupdate", http.StatusOK)
+	utils.SendSuccess(c, category, "Category berhasil diupdate", nil, http.StatusOK)
 }
 
 // DeleteCategory endpoint.
@@ -46,7 +46,7 @@ func (ctrl *CategoryController) DeleteCategory(c *gin.Context) {
 		return
 	}
 
-	utils.SendSuccess(c, nil, "Category berhasil dihapus", http.StatusOK)
+	utils.SendSuccess(c, nil, "Category berhasil dihapus", nil, http.StatusOK)
 }
 
 // CreateCategory endpoint.
@@ -64,7 +64,7 @@ func (ctrl *CategoryController) CreateCategory(c *gin.Context) {
 		return
 	}
 
-	utils.SendSuccess(c, category, "Data berhasil ditambahkan", http.StatusCreated)
+	utils.SendSuccess(c, category, "Data berhasil ditambahkan", nil, http.StatusCreated)
 }
 
 // ListCategories endpoint.
@@ -74,7 +74,7 @@ func (ctrl *CategoryController) ListCategories(c *gin.Context) {
 		utils.SendError(c, 500, err.Error())
 		return
 	}
-	utils.SendSuccess(c, categories, "list categories")
+	utils.SendSuccess(c, categories, "list categories", nil, http.StatusOK)
 }
 
 // GetCategoryByID endpoint.
@@ -85,5 +85,5 @@ func (ctrl *CategoryController) GetCategoryByID(c *gin.Context) {
 		utils.SendError(c, 404, "Category tidak ditemukan")
 		return
 	}
-	utils.SendSuccess(c, category, "Category ditemukan", http.StatusOK)
+	utils.SendSuccess(c, category, "Category ditemukan", nil, http.StatusOK)
 }

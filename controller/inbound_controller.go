@@ -2,10 +2,7 @@
 package controller
 
 import (
-	"fmt"
-	"math/rand"
 	"net/http"
-	"time"
 
 	"wms/models"
 	"wms/services"
@@ -16,12 +13,6 @@ import (
 	"gorm.io/gorm"
 )
 
-func generateUniqueBarcode() string {
-	t := time.Now().UnixNano()
-	r := rand.Intn(100000)
-	return fmt.Sprintf("BC-%d-%d", t, r)
-}
-
 func ListAllProductMastersHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var masters []models.ProductMaster
@@ -29,7 +20,7 @@ func ListAllProductMastersHandler(db *gorm.DB) gin.HandlerFunc {
 			utils.SendError(c, 500, err.Error())
 			return
 		}
-		utils.SendSuccess(c, masters, "List master data", http.StatusOK)
+		utils.SendSuccess(c, masters, "List master data", nil, http.StatusOK)
 	}
 }
 
@@ -67,6 +58,6 @@ func InboundManualHandler(db *gorm.DB) gin.HandlerFunc {
 			utils.SendError(c, 500, err.Error())
 			return
 		}
-		utils.SendSuccess(c, gin.H{"pending": pending, "master": master}, "Inbound berhasil dibuat", http.StatusOK)
+		utils.SendSuccess(c, gin.H{"pending": pending, "master": master}, "Inbound berhasil dibuat", nil, http.StatusOK)
 	}
 }

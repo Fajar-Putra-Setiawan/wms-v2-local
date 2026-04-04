@@ -32,5 +32,5 @@ func (ctl *ProductMasterController) ListStagingSticker(c *gin.Context) {
 		utils.SendError(c, 500, err.Error())
 		return
 	}
-	utils.SendSuccess(c, masters, "List product master staging_sticker", http.StatusOK)
+	utils.SendSuccess(c, masters, "List product master staging_sticker", nil, http.StatusOK)
 }

@@ -21,8 +21,8 @@ type ErrorItem struct {
 	Message string `json:"message"`
 }
 
-// SendSuccess sends a standard success response.
-func SendSuccess(c *gin.Context, data interface{}, message string, statusCode ...int) {
+// SendSuccess sends a standard success response with optional meta.
+func SendSuccess(c *gin.Context, data interface{}, message string, meta interface{}, statusCode ...int) {
 	code := http.StatusOK
 	if len(statusCode) > 0 {
 		code = statusCode[0]
@@ -36,8 +36,13 @@ func SendSuccess(c *gin.Context, data interface{}, message string, statusCode ..
 		Success: true,
 		Message: message,
 		Data:    data,
-		Meta:    nil,
+		Meta:    meta,
 	})
+}
+
+// SendSuccessWithMetaNull is for backward compatibility, always sends meta as null.
+func SendSuccessWithMetaNull(c *gin.Context, data interface{}, message string, statusCode ...int) {
+	SendSuccess(c, data, message, nil, statusCode...)
 }
 
 // SendPaginatedSuccess sends paginated success response.

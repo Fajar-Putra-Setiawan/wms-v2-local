@@ -33,7 +33,7 @@ func (ctrl *BuyerController) CreateBuyer(c *gin.Context) {
 		return
 	}
 
-	utils.SendSuccess(c, buyer, "Buyer berhasil ditambahkan", http.StatusCreated)
+	utils.SendSuccess(c, buyer, "Buyer berhasil ditambahkan", nil, http.StatusCreated)
 }
 
 // GetBuyerByID endpoint.
@@ -44,7 +44,7 @@ func (ctrl *BuyerController) GetBuyerByID(c *gin.Context) {
 		utils.SendError(c, 404, err.Error())
 		return
 	}
-	utils.SendSuccess(c, buyer, "", http.StatusOK)
+	utils.SendSuccess(c, buyer, "", nil, http.StatusOK)
 }
 
 // ListBuyers endpoint.
@@ -54,7 +54,8 @@ func (ctrl *BuyerController) ListBuyers(c *gin.Context) {
 		utils.SendError(c, 500, err.Error())
 		return
 	}
-	utils.SendSuccess(c, buyers, "", http.StatusOK)
+	// Contoh meta kosong, bisa diisi pagination jika ada
+	utils.SendSuccess(c, buyers, "", nil, http.StatusOK)
 }
 
 // UpdateBuyer endpoint.
@@ -71,7 +72,7 @@ func (ctrl *BuyerController) UpdateBuyer(c *gin.Context) {
 		utils.SendError(c, 400, err.Error())
 		return
 	}
-	utils.SendSuccess(c, buyer, "Buyer berhasil diupdate", http.StatusOK)
+	utils.SendSuccess(c, buyer, "Buyer berhasil diupdate", nil, http.StatusOK)
 }
 
 // DeleteBuyer endpoint.
@@ -81,5 +82,5 @@ func (ctrl *BuyerController) DeleteBuyer(c *gin.Context) {
 		utils.SendError(c, 400, err.Error())
 		return
 	}
-	utils.SendSuccess(c, nil, "Buyer berhasil dihapus", http.StatusOK)
+	utils.SendSuccess(c, nil, "Buyer berhasil dihapus", nil, http.StatusOK)
 }

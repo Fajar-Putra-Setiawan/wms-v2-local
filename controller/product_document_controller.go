@@ -22,5 +22,5 @@ func (ctl *ProductDocumentController) ListDocuments(c *gin.Context) {
 		utils.SendError(c, 500, err.Error())
 		return
 	}
-	utils.SendSuccess(c, docs, "List product documents", http.StatusOK)
+	utils.SendSuccess(c, docs, "List product documents", nil, http.StatusOK)
 }
