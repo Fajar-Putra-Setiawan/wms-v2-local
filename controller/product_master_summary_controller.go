@@ -20,29 +20,32 @@ func NewProductMasterSummaryController(service services.ProductMasterSummaryServ
 func (ctl *ProductMasterSummaryController) GetSummary(c *gin.Context) {
 	fromStr := c.Query("from")
 	toStr := c.Query("to")
-	// Perbaiki urutan parsing dan defaulting agar tidak error jika salah satu kosong
+	var from, to time.Time
+	var err error
 	if fromStr == "" && toStr == "" {
-		utils.SendError(c, http.StatusBadRequest, "from or to date required")
-		return
+		// Jika keduanya kosong, pakai hari ini
+		now := time.Now()
+		from = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+		to = from.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
+	} else {
+		if fromStr == "" && toStr != "" {
+			fromStr = toStr
+		}
+		if fromStr != "" && toStr == "" {
+			toStr = fromStr
+		}
+		from, err = time.Parse("2006-01-02", fromStr)
+		if err != nil {
+			utils.SendError(c, http.StatusBadRequest, "Invalid from date format (yyyy-mm-dd)")
+			return
+		}
+		to, err = time.Parse("2006-01-02", toStr)
+		if err != nil {
+			utils.SendError(c, http.StatusBadRequest, "Invalid to date format (yyyy-mm-dd)")
+			return
+		}
+		to = to.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
 	}
-	if fromStr == "" && toStr != "" {
-		fromStr = toStr
-	}
-	if fromStr != "" && toStr == "" {
-		toStr = fromStr
-	}
-	from, err := time.Parse("2006-01-02", fromStr)
-	if err != nil {
-		utils.SendError(c, http.StatusBadRequest, "Invalid from date format (yyyy-mm-dd)")
-		return
-	}
-	to, err := time.Parse("2006-01-02", toStr)
-	if err != nil {
-		utils.SendError(c, http.StatusBadRequest, "Invalid to date format (yyyy-mm-dd)")
-		return
-	}
-	// Set waktu to ke akhir hari agar data pada tanggal to tetap terambil
-	to = to.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
 	summary, err := ctl.service.GetSummary(from, to)
 	if err != nil {
 		utils.SendError(c, 500, err.Error())

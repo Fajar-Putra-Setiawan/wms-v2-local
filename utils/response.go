@@ -31,13 +31,18 @@ func SendSuccess(c *gin.Context, data interface{}, message string, meta interfac
 		message = "success"
 	}
 
-	c.JSON(code, APIResponse{
-		Code:    code,
-		Success: true,
-		Message: message,
-		Data:    data,
-		Meta:    meta,
-	})
+	       // Jika data nil, jadikan map kosong agar di JSON menjadi {}
+	       respData := data
+	       if data == nil {
+		       respData = map[string]interface{}{}
+	       }
+	       c.JSON(code, APIResponse{
+		       Code:    code,
+		       Success: true,
+		       Message: message,
+		       Data:    respData,
+		       Meta:    meta,
+	       })
 }
 
 // SendSuccessWithMetaNull is for backward compatibility, always sends meta as null.
